@@ -65,7 +65,8 @@ def _print_line(first, second):
 
 
 def show_non_unique_files(non_unique_file_list, verbose):
-    _print_line('First occurence', 'Other occurence')
+    if verbose:
+        _print_line('First occurence', 'Other occurence')
     for file_list in non_unique_file_list:
         if verbose:
             first_occurence = file_list[0]
