@@ -12,5 +12,5 @@ Search a directory recursively and display a list of python list containing file
 Usage
 -----
 
-# To delete all duplicate files in the current directory tree
-fdup.py | xargs -0 rm
+	# To delete all duplicate files in the current directory tree
+	fdup.py | xargs -0 rm
