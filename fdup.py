@@ -37,7 +37,7 @@ from pprint import pprint
 def list_files(base_dir):
     for root, dirs, files in os.walk(base_dir):
         for file in files:
-            yield os.path.join(root, file)
+            yield os.path.abspath(os.path.join(root, file))
 
 
 def get_md5s_and_names(files):
