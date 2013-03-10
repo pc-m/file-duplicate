@@ -26,12 +26,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
+import argparse
 import os
 import sys
 import hashlib
 from collections import defaultdict
-from pprint import pprint
 
 
 def list_files(base_dir):
@@ -61,21 +60,49 @@ def get_non_unique_files(md5s_map):
             yield file_list
 
 
-def show_non_unique_files(non_unique_file_list):
+def _print_line(first, second):
+    print '%s: %s' % (first, second)
+
+
+def show_non_unique_files(non_unique_file_list, verbose):
+    _print_line('First occurence', 'Other occurence')
     for file_list in non_unique_file_list:
-        pprint(file_list)
+        if verbose:
+            first_occurence = file_list[0]
+            for other_occurence in file_list[1:]:
+                _print_line(first_occurence, other_occurence)
+        else:
+            for other_occurence in file_list[1:]:
+                print other_occurence
 
 
-def find_duplicates(root):
-    file_generator =  list_files(root)
+def find_duplicates(root, verbose):
+    file_generator = list_files(root)
     md5s_names_generator = get_md5s_and_names(file_generator)
     md5s_map = get_md5s_map(md5s_names_generator)
     non_unique_files = get_non_unique_files(md5s_map)
-    show_non_unique_files(non_unique_files)
+    show_non_unique_files(non_unique_files, verbose)
+
+
+def _new_argument_parser():
+    parser = argparse.ArgumentParser(
+        'Finds file duplicate in a directory tree based on md5sum'
+    )
+    parser.add_argument(
+        'root', nargs='?', help='Directory to scan', default=os.getcwd()
+    )
+    parser.add_argument(
+        '-v', '--verbose', action='store_true',
+        help='Display a human readable result'
+    )
+    return parser
 
 
 if __name__ == '__main__':
-    root = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
+    parser = _new_argument_parser()
+    args = parser.parse_args()
+    root = args.root
     if os.path.isdir(root):
-        find_duplicates(root)
-    sys.exit(2)
+        find_duplicates(root, args.verbose)
+    else:
+        sys.exit(2)
