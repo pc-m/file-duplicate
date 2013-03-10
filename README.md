@@ -13,4 +13,4 @@ Usage
 -----
 
 	# To delete all duplicate files in the current directory tree
-	fdup.py | xargs -0 rm
+	fdup.py | tr '\n' '\0' | xargs -0 rm
