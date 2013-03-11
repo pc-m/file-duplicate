@@ -27,10 +27,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import argparse
+import hashlib
 import os
 import sys
-import hashlib
-from collections import defaultdict
 
 
 def list_files(base_dir):
@@ -47,42 +46,25 @@ def get_md5s_and_names(files):
         yield md5.hexdigest(), file
 
 
-def get_md5s_map(md5s_and_names):
-    md5s_map = defaultdict(list)
-    for md5, name in md5s_and_names:
-        md5s_map[md5].append(name)
-    return md5s_map
-
-
-def get_non_unique_files(md5s_map):
-    for file_list in md5s_map.itervalues():
-        if len(file_list) > 1:
-            yield file_list
-
-
-def _print_line(first, second):
-    print '%s: %s' % (first, second)
-
-
-def show_non_unique_files(non_unique_file_list, verbose):
-    if verbose:
-        _print_line('First occurence', 'Other occurence')
-    for file_list in non_unique_file_list:
-        if verbose:
-            first_occurence = file_list[0]
-            for other_occurence in file_list[1:]:
-                _print_line(first_occurence, other_occurence)
+def get_non_unique_files(md5s_names):
+    unique_md5s = set()
+    for md5, name in md5s_names:
+        if md5 not in unique_md5s:
+            unique_md5s.add(md5)
         else:
-            for other_occurence in file_list[1:]:
-                sys.stdout.write(other_occurence + '\x00')
+            yield name
 
 
-def find_duplicates(root, verbose):
-    file_generator = list_files(root)
-    md5s_names_generator = get_md5s_and_names(file_generator)
-    md5s_map = get_md5s_map(md5s_names_generator)
-    non_unique_files = get_non_unique_files(md5s_map)
-    show_non_unique_files(non_unique_files, verbose)
+def show_non_unique_files(non_unique_files):
+    for filename in non_unique_files:
+        sys.stdout.write(filename + '\x00')
+
+
+def find_duplicates(root):
+    (show_non_unique_files
+     (get_non_unique_files
+      (get_md5s_and_names
+       (list_files(root)))))
 
 
 def _new_argument_parser():
@@ -92,10 +74,6 @@ def _new_argument_parser():
     parser.add_argument(
         'root', nargs='?', help='Directory to scan', default=os.getcwd()
     )
-    parser.add_argument(
-        '-v', '--verbose', action='store_true',
-        help='Display a human readable result'
-    )
     return parser
 
 
@@ -104,6 +82,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     root = args.root
     if os.path.isdir(root):
-        find_duplicates(root, args.verbose)
+        find_duplicates(root)
     else:
         sys.exit(2)
