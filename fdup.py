@@ -74,7 +74,7 @@ def show_non_unique_files(non_unique_file_list, verbose):
                 _print_line(first_occurence, other_occurence)
         else:
             for other_occurence in file_list[1:]:
-                print other_occurence
+                sys.stdout.write(other_occurence + '\x00')
 
 
 def find_duplicates(root, verbose):
