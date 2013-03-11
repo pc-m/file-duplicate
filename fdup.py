@@ -33,17 +33,17 @@ import sys
 
 
 def list_files(base_dir):
-    for root, dirs, files in os.walk(base_dir):
-        for file in files:
-            yield os.path.abspath(os.path.join(root, file))
+    for root, _, files in os.walk(base_dir):
+        for filename in files:
+            yield os.path.abspath(os.path.join(root, filename))
 
 
 def get_md5s_and_names(files):
-    for file in files:
-        with open(file, 'rb') as f:
+    for filename in files:
+        with open(filename, 'rb') as f:
             md5 = hashlib.md5()
             md5.update(f.read())
-        yield md5.hexdigest(), file
+        yield md5.hexdigest(), filename
 
 
 def get_non_unique_files(md5s_names):
